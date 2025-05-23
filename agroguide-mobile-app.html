@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="AgroGuide - Topraksız tarım için kapsamlı mobil rehber uygulaması">
+    <meta name="theme-color" content="#28a745">
+    <title>AgroGuide - Topraksız Tarım Rehberi</title>
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iOCIgZmlsbD0iIzI4YTc0NSIvPgo8dGV4dCB4PSIxNiIgeT0iMjAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmb250LXdlaWdodD0iYm9sZCIgZmlsbD0id2hpdGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiPkFHPC90ZXh0Pgo8L3N2Zz4K">
+    
+    <style>
+        /* Inline CSS from agroguide_css.css */
+        /* Global Reset ve Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* Ana Container */
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        .header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            min-width: 80px;
+        }
+
+        .nav-tab:hover {
+            background: #e9ecef;
+            color: #495057;
+        }
+
+        .nav-tab.active {
+            background: #28a745;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Content Area */
+        .content {
+            padding: 20px;
+            min-height: 400px;
+            padding-bottom: 80px;
+        }
+
+        /* Screen Management */
+        .screen {
+            display: none;
+            animation: fadeOut 0.3s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes fadeOut {
+            from { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+            to { 
+                opacity: 0; 
+                transform: translateY(-20px); 
+            }
+        }
+
+        /* Welcome Card */
+        .welcome-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 30px 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(245, 87, 108, 0.3);
+        }
+
+        .welcome-card h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .welcome-card p {
+            font-size: 14px;
+            opacity: 0.95;
+            font-weight: 400;
+        }
+
+        /* Feature Grid */
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover {
+            border-color: #28a745;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(40, 167, 69, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+            color: #28a745;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card h3 {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #495057;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.4;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        /* System Cards */
+        .system-cards {
+            display: grid;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .system-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+            position: relative;
+        }
+
+        .system-card:hover, .system-card.selected {
+            border-color: #28a745;
+            background: #f8fff9;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.15);
+        }
+
+        .system-card h3 {
+            color: #28a745;
+            margin-bottom: 10px;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .system-card p {
+            margin-bottom: 8px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            max-width: 400px;
+            width: 100%;
+            background: white;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .bottom-nav-item {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 11px;
+            color: #666;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .bottom-nav-item.active {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .bottom-nav-item i {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal h3 {
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .modal p {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Community Styles */
+        .community-post {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 3px solid #28a745;
+        }
+
+        .community-user {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .community-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #28a745;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        .community-name {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .community-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .community-actions {
+            margin-top: 10px;
+        }
+
+        .community-actions button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 15px;
+            color: #6c757d;
+        }
+
+        .community-actions button:hover {
+            color: #28a745;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: #e9ecef;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #28a745, #20c997);
+            height: 100%;
+            width: 20%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Step Container */
+        .step-container {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #28a745;
+        }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .step-number {
+            background: #28a745;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .container {
+                max-width: 100%;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notification Toast */
+        .notification-toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            z-index: 1001;
+            max-width: 350px;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🌱 AgroGuide</h1>
+            <p>Topraksız Tarım Rehber Uygulaması</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Ana Sayfa -->
+            <div id="home-screen" class="screen active">
+                <div class="welcome-card">
+                    <h2>Hoş Geldiniz!</h2>
+                    <p>Topraksız tarım yolculuğunuza başlayalım. Size özel sistem önerileri ve adım adım rehberlik için profilinizi oluşturun.</p>
+                </div>
+
+                <div class="feature-grid">
+                    <div class="feature-card" onclick="showScreen('profile-screen')">
+                        <div class="feature-icon">👤</div>
+                        <h3>Profil Oluştur</h3>
+                        <p>Deneyim seviyenizi ve hedeflerinizi belirleyin</p>
+                    </div>
+
+                    <div class="feature-card" onclick="showScreen('systems-screen')">
+                        <div class="feature-icon">🌊</div>
+                        <h3>Sistem Seçimi</h3>
+                        <p>Size uygun topraksız tarım sistemini keşfedin</p>
+                    </div>
+
+                    <div class="feature-card" onclick="showScreen('guide-screen')">
+                        <div class="feature-icon">📖</div>
+                        <h3>Kurulum Rehberi</h3>
+                        <p>Adım adım kurulum talimatları</p>
+                    </div>
+
+                    <div class="feature-card" onclick="showScreen('suppliers-screen')">
+                        <div class="feature-icon">🏪</div>
+                        <h3>Tedarikçiler</h3>
+                        <p>Yerli tedarikçilerden malzeme temin edin</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profil Oluşturma -->
+            <div id="profile-screen" class="screen">
+                <h2>📋 Profil Oluşturma</h2>
+                <p>Size en uygun sistem önerisini verebilmemiz için lütfen aşağıdaki bilgileri doldurun:</p>
+
+                <form onsubmit="analyzeProfile(); return false;">
+                    <div class="form-group">
+                        <label for="experience">Tarım Deneyimi:</label>
+                        <select id="experience" class="form-control" required>
+                            <option value="">Seçiniz</option>
+                            <option value="beginner">Yeni başlayan</option>
+                            <option value="intermediate">Orta seviye</option>
+                            <option value="advanced">İleri seviye</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="purpose">Üretim Amacı:</label>
+                        <select id="purpose" class="form-control" required>
+                            <option value="">Seçiniz</option>
+                            <option value="hobby">Hobi amaçlı</option>
+                            <option value="family">Aile tüketimi</option>
+                            <option value="commercial">Ticari üretim</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="area">Kullanılabilir Alan (m²):</label>
+                        <input type="number" id="area" class="form-control" min="1" max="1000" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="budget">Bütçe Aralığı:</label>
+                        <select id="budget" class="form-control" required>
+                            <option value="">Seçiniz</option>
+                            <option value="low">2,000 - 5,000 TL</option>
+                            <option value="medium">5,000 - 10,000 TL</option>
+                            <option value="high">10,000+ TL</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="crops">Yetiştirmek İstediğiniz Ürünler:</label>
+                        <select id="crops" class="form-control" required>
+                            <option value="">Seçiniz</option>
+                            <option value="leafy">Yapraklı sebzeler (Marul, Ispanak)</option>
+                            <option value="herbs">Aromatik bitkiler (Fesleğen, Nane)</option>
+                            <option value="tomatoes">Domates, Biber</option>
+                            <option value="strawberries">Çilek</option>
+                            <option value="mixed">Karışık</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn">📊 Profili Analiz Et</button>
+                </form>
+            </div>
+
+            <!-- Sistem Seçimi -->
+            <div id="systems-screen" class="screen">
+                <h2>🌊 Sistem Seçimi</h2>
+                <p>Aşağıdaki topraksız tarım sistemlerinden size en uygun olanını seçin:</p>
+
+                <div class="system-cards">
+                    <div class="system-card" onclick="selectSystem('nft')">
+                        <h3>🌊 NFT (Nutrient Film Technique)</h3>
+                        <p><strong>Zorluk:</strong> Orta</p>
+                        <p><strong>Maliyet:</strong> 3,000-8,000 TL</p>
+                        <p><strong>Su Tasarrufu:</strong> %70</p>
+                        <p><strong>Uygun Ürünler:</strong> Marul, Ispanak, Aromatik bitkiler</p>
+                        <p>Sürekli akan ince besin filmi ile bitkileri besleyen etkili sistem</p>
+                    </div>
+
+                    <div class="system-card" onclick="selectSystem('dwc')">
+                        <h3>💧 DWC (Deep Water Culture)</h3>
+                        <p><strong>Zorluk:</strong> Kolay</p>
+                        <p><strong>Maliyet:</strong> 2,000-6,000 TL</p>
+                        <p><strong>Su Tasarrufu:</strong> %60</p>
+                        <p><strong>Uygun Ürünler:</strong> Yapraklı sebzeler, Fesleğen</p>
+                        <p>Başlangıç için ideal, basit ve ekonomik sistem</p>
+                    </div>
+
+                    <div class="system-card" onclick="selectSystem('aeroponic')">
+                        <h3>💨 Aeroponik Sistem</h3>
+                        <p><strong>Zorluk:</strong> Zor</p>
+                        <p><strong>Maliyet:</strong> 8,000-15,000 TL</p>
+                        <p><strong>Su Tasarrufu:</strong> %90</p>
+                        <p><strong>Uygun Ürünler:</strong> Domates, Biber, Çilek</p>
+                        <p>En gelişmiş sistem, maksimum verim ve su tasarrufu</p>
+                    </div>
+
+                    <div class="system-card" onclick="selectSystem('ebb-flow')">
+                        <h3>🔄 Ebb & Flow (Gel-Git)</h3>
+                        <p><strong>Zorluk:</strong> Orta</p>
+                        <p><strong>Maliyet:</strong> 4,000-10,000 TL</p>
+                        <p><strong>Su Tasarrufu:</strong> %65</p>
+                        <p><strong>Uygun Ürünler:</strong> Çilek, Domates, Çeşitli sebzeler</p>
+                        <p>Esnek ve güvenilir, çok çeşitli bitki yetiştirebilir</p>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="showScreen('guide-screen')" style="margin-top: 20px;">➡️ Kurulum Rehberine Geç</button>
+            </div>
+
+            <!-- Kurulum Rehberi -->
+            <div id="guide-screen" class="screen">
+                <h2>📖 Kurulum Rehberi</h2>
+                <p>Seçtiğiniz sistem: <strong id="selected-system">NFT Sistemi</strong></p>
+
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+
+                <div id="step-1" class="step-container">
+                    <div class="step-header">
+                        <div class="step-number">1</div>
+                        <h3>Malzeme Hazırlığı</h3>
+                    </div>
+                    <p>Gerekli malzemeleri temin edin:</p>
+                    <ul>
+                        <li>PVC boru (110mm, 2m) - 4 adet</li>
+                        <li>Su pompası (800L/h) - 1 adet</li>
+                        <li>Rezervuar tank (50L) - 1 adet</li>
+                        <li>Hortum ve bağlantı parçaları</li>
+                        <li>Bitki sepetleri - 20 adet</li>
+                        <li>Perlit veya taş yünü</li>
+                    </ul>
+                </div>
+
+                <div id="step-2" class="step-container hidden">
+                    <div class="step-header">
+                        <div class="step-number">2</div>
+                        <h3>Montaj İşlemleri</h3>
+                    </div>
+                    <p>Sistemin montajını gerçekleştirin:</p>
+                    <ul>
+                        <li>PVC boruları 15° eğimle yerleştirin</li>
+                        <li>Her 20cm'de bitki deliği açın (5cm çap)</li>
+                        <li>Su pompasını rezervuara bağlayın</li>
+                        <li>Dönüş hortumunu rezervuara bağlayın</li>
+                    </ul>
+                </div>
+
+                <div class="nav-buttons" style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-secondary" onclick="previousStep()">⬅️ Önceki</button>
+                    <button class="btn" onclick="nextStep()">➡️ Sonraki</button>
+                </div>
+            </div>
+
+            <!-- Üretim Takibi -->
+            <div id="production-screen" class="screen">
+                <h2>📊 Üretim Takibi</h2>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number">24</div>
+                        <div>Gün Aktif</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">18</div>
+                        <div>Bitki Sayısı</div>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <h3>📋 Günlük Kontrol Listesi</h3>
+                    <div style="margin-top: 15px;">
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" style="margin-right: 10px;">
+                            Su seviyesi kontrolü
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" style="margin-right: 10px;">
+                            pH değeri ölçümü (5.5-6.5)
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" style="margin-right: 10px;">
+                            Pompa çalışma kontrolü
+                        </label>
+                        <label style="display: flex; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" style="margin-right: 10px;">
+                            Bitki gelişimi gözlemi
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: #d4edda; padding: 15px; border-radius: 8px; margin-top: 20px; border-left: 4px solid #28a745;">
+                    <h4>🎯 Bu Hafta Özeti</h4>
+                    <p><strong>Su tüketimi:</strong> 45L (-65% tasarruf)</p>
+                    <p><strong>Büyüme oranı:</strong> Normal</p>
+                    <p><strong>Beklenen hasat:</strong> 2 hafta</p>
+                </div>
+            </div>
+
+            <!-- Topluluk -->
+            <div id="community-screen" class="screen">
+                <h2>👥 Topluluk</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <textarea placeholder="Deneyimlerinizi paylaşın, soru sorun..." style="width: 100%; padding: 15px; border: 2px solid #e9ecef; border-radius: 8px; min-height: 80px; resize: vertical;"></textarea>
+                    <button class="btn" onclick="sharePost()" style="margin-top: 10px;">📤 Paylaş</button>
+                </div>
+
+                <div class="community-post">
+                    <div class="community-user">
+                        <div class="community-avatar">AK</div>
+                        <div>
+                            <div class="community-name">Ahmet K.</div>
+                            <div class="community-time">2 saat önce</div>
+                        </div>
+                    </div>
+                    <p>NFT sistemimde ilk hasadımı yaptım! 20 marul bitkisinden 3.5 kg ürün aldım. Gerçekten çok verimli! 🥬✨</p>
+                    <div class="community-actions">
+                        <button onclick="likePost(1)">👍 12 Beğeni</button>
+                        <button onclick="showComments(1)">💬 5 Yorum</button>
+                        <button onclick="sharePost(1)">📤 Paylaş</button>
+                    </div>
+                </div>
+
+                <div class="community-post">
+                    <div class="community-user">
+                        <div class="community-avatar" style="background: #dc3545;">ZM</div>
+                        <div>
+                            <div class="community-name">Zeynep M.</div>
+                            <div class="community-time">5 saat önce</div>
+                        </div>
+                    </div>
+                    <p>Besin çözeltisinde pH değeri sürekli yükseliyor. Bu durumla karşılaşan var mı? Çözüm önerilerinizi bekliyorum 🙏</p>
+                    <div class="community-actions">
+                        <button onclick="likePost(2)">👍 8 Beğeni</button>
+                        <button onclick="showComments(2)">💬 15 Yorum</button>
+                        <button onclick="sharePost(2)">📤 Paylaş</button>
+                    </div>
+                </div>
+
+                <div class="community-post">
+                    <div class="community-user">
+                        <div class="community-avatar" style="background: #007bff;">MY</div>
+                        <div>
+                            <div class="community-name">Mehmet Y.</div>
+                            <div class="community-time">1 gün önce</div>
+                        </div>
+                    </div>
+                    <p>Aeroponik sistemde çilek yetiştiriyorum. 2. ayımda ve sonuçlar harika! Geleneksel yöntemden %40 daha verimli 🍓</p>
+                    <div class="community-actions">
+                        <button onclick="likePost(3)">👍 23 Beğeni</button>
+                        <button onclick="showComments(3)">💬 8 Yorum</button>
+                        <button onclick="sharePost(3)">📤 Paylaş</button>
+                    </div>
+                </div>
+
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: 20px;">
+                    <h3 style="color: #28a745; margin-bottom: 15px;">📚 Bu Hafta Popüler</h3>
+                    <ul style="margin-left: 20px;">
+                        <li style="margin-bottom: 8px;">
+                            <a href="#" style="color: #495057; text-decoration: none;">
+                                NFT sisteminde alg problemi çözümleri <span style="color: #6c757d;">(1,250 görüntüleme)</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 8px;">
+                            <a href="#" style="color: #495057; text-decoration: none;">
+                                Kışlık üretim için ışıklandırma tavsiyeleri <span style="color: #6c757d;">(980 görüntüleme)</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 8px;">
+                            <a href="#" style="color: #495057; text-decoration: none;">
+                                Besin çözeltisi hazırlama kılavuzu <span style="color: #6c757d;">(756 görüntüleme)</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tedarikçiler -->
+            <div id="suppliers-screen" class="screen">
+                <h2>🏪 Yerli Tedarikçiler</h2>
+                <p>Size özel seçilmiş yerli tedarikçilerden malzeme ve ekipman temin edin:</p>
+
+                <div style="border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #495057; font-size: 16px;">🏭 Tarım Tek A.Ş.</h3>
+                        <div style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-size: 12px;">İstanbul</div>
+                    </div>
+                    <p>NFT sistemi komple seti</p>
+                    <p><strong>Fiyat:</strong> 3,500 TL</p>
+                    <p>⭐ 4.8/5 (127 değerlendirme)</p>
+                    <div style="margin: 10px 0;">
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">Ücretsiz kurulum</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">2 yıl garanti</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px;">Teknik destek</span>
+                    </div>
+                    <button class="btn" onclick="contactSupplier(1)">📞 İletişime Geç</button>
+                </div>
+
+                <div style="border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #495057; font-size: 16px;">🏭 Sera Malzeme Ltd.</h3>
+                        <div style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-size: 12px;">Antalya</div>
+                    </div>
+                    <p>DWC sistemi ve besin çözeltileri</p>
+                    <p><strong>Fiyat:</strong> 2,800 TL</p>
+                    <p>⭐ 4.6/5 (89 değerlendirme)</p>
+                    <div style="margin: 10px 0;">
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">Hızlı teslimat</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">1 yıl garanti</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px;">Online destek</span>
+                    </div>
+                    <button class="btn" onclick="contactSupplier(2)">📞 İletişime Geç</button>
+                </div>
+
+                <div style="border: 1px solid #dee2e6; border-radius: 12px; padding: 20px; margin-bottom: 15px; background: white;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="color: #495057; font-size: 16px;">🏭 Hidroponik Teknoloji</h3>
+                        <div style="background: #28a745; color: white; padding: 4px 8px; border-radius: 15px; font-size: 12px;">İzmir</div>
+                    </div>
+                    <p>Aeroponik sistem ve otomasyonu</p>
+                    <p><strong>Fiyat:</strong> 8,500 TL</p>
+                    <p>⭐ 4.9/5 (156 değerlendirme)</p>
+                    <div style="margin: 10px 0;">
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">Otomasyon dahil</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px; margin-right: 5px;">3 yıl garanti</span>
+                        <span style="background: #e9ecef; padding: 4px 8px; border-radius: 12px; font-size: 12px;">7/24 destek</span>
+                    </div>
+                    <button class="btn" onclick="contactSupplier(3)">📞 İletişime Geç</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <button class="bottom-nav-item active" onclick="showScreen('home-screen')">
+                <i>🏠</i>
+                Ana Sayfa
+            </button>
+            <button class="bottom-nav-item" onclick="showScreen('guide-screen')">
+                <i>📖</i>
+                Rehber
+            </button>
+            <button class="bottom-nav-item" onclick="showScreen('production-screen')">
+                <i>📊</i>
+                Üretim
+            </button>
+            <button class="bottom-nav-item" onclick="showScreen('community-screen')">
+                <i>👥</i>
+                Topluluk
+            </button>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="system-recommendation-modal" class="modal">
+        <div class="modal-content">
+            <h3>🎯 Size Özel Sistem Önerisi</h3>
+            <div id="recommendation-content">
+                <div style="background: #f8fff9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                    <h4 style="color: #28a745;">NFT (Nutrient Film Technique)</h4>
+                    <p><strong>Sebep:</strong> Başlangıç dostu ve orta seviye verimlilik. İyi su tasarrufu sağlar.</p>
+                    <p><strong>Tahmini Maliyet:</strong> 3,000-6,000 TL</p>
+                    <p><strong>Beklenen Verim:</strong> 1.2 kg yapraklı sebze/ay</p>
+                    <p><strong>Su Tasarrufu:</strong> %70</p>
+                    <div style="margin-top: 10px;">
+                        <strong>Avantajlar:</strong>
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>Su tasarrufu</li>
+                            <li>Sürekli beslenme</li>
+                            <li>Temiz üretim</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="acceptRecommendation()">✅ Kabul Et</button>
+                <button class="btn btn-secondary" onclick="closeModal()">❌ Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="contact-modal" class="modal">
+        <div class="modal-content">
+            <h3>📞 Tedarikçi İletişim</h3>
+            <div id="contact-content">
+                <p><strong>Telefon:</strong> 0212 555 0123</p>
+                <p><strong>E-posta:</strong> info@tarimtek.com.tr</p>
+                <p><strong>Adres:</strong> İstanbul</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="btn" onclick="callSupplier()">📞 Ara</button>
+                <button class="btn btn-secondary" onclick="closeModal()">❌ Kapat</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simplified JavaScript for demo functionality
+        let currentScreen = 'home-screen';
+        let currentStep = 1;
+        let totalSteps = 5;
+        let selectedSystem = 'nft';
+
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            
+            // Show target screen
+            document.getElementById(screenId).classList.add('active');
+            currentScreen = screenId;
+            
+            // Update bottom navigation
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Map screens to nav items
+            const navMapping = {
+                'home-screen': 0,
+                'guide-screen': 1,
+                'production-screen': 2,
+                'community-screen': 3
+            };
+            
+            if (navMapping[screenId] !== undefined) {
+                document.querySelectorAll('.bottom-nav-item')[navMapping[screenId]].classList.add('active');
+            }
+        }
+
+        function analyzeProfile() {
+            const experience = document.getElementById('experience').value;
+            const purpose = document.getElementById('purpose').value;
+            const area = document.getElementById('area').value;
+            const budget = document.getElementById('budget').value;
+            const crops = document.getElementById('crops').value;
+
+            if (!experience || !purpose || !area || !budget || !crops) {
+                showNotification('Lütfen tüm alanları doldurun.', 'warning');
+                return;
+            }
+
+            // Show recommendation modal
+            document.getElementById('system-recommendation-modal').style.display = 'block';
+            showNotification('✅ Profil analizi tamamlandı! Size özel öneri hazırlandı.', 'success');
+        }
+
+        function selectSystem(systemType) {
+            selectedSystem = systemType;
+            
+            // Update selected system display
+            const systemNames = {
+                'nft': 'NFT (Nutrient Film Technique)',
+                'dwc': 'DWC (Deep Water Culture)',
+                'aeroponic': 'Aeroponik Sistem',
+                'ebb-flow': 'Ebb & Flow (Gel-Git)'
+            };
+            
+            document.getElementById('selected-system').textContent = systemNames[systemType];
+            
+            // Visual feedback
+            document.querySelectorAll('.system-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            event.target.closest('.system-card').classList.add('selected');
+            
+            showNotification(`✅ ${systemNames[systemType]} seçildi!`, 'success');
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                document.getElementById(`step-${currentStep}`).classList.add('hidden');
+                currentStep++;
+                
+                if (currentStep <= totalSteps) {
+                    let nextStepElement = document.getElementById(`step-${currentStep}`);
+                    if (!nextStepElement) {
+                        // Create next step if it doesn't exist
+                        nextStepElement = createStepElement(currentStep);
+                        document.querySelector('#guide-screen').insertBefore(nextStepElement, document.querySelector('.nav-buttons'));
+                    }
+                    nextStepElement.classList.remove('hidden');
+                }
+                
+                updateProgress();
+                
+                if (currentStep > totalSteps) {
+                    showNotification('🎉 Kurulum başarıyla tamamlandı!', 'success');
+                    setTimeout(() => showScreen('production-screen'), 2000);
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                document.getElementById(`step-${currentStep}`).classList.add('hidden');
+                currentStep--;
+                document.getElementById(`step-${currentStep}`).classList.remove('hidden');
+                updateProgress();
+            }
+        }
+
+        function updateProgress() {
+            const percentage = (currentStep / totalSteps) * 100;
+            document.querySelector('.progress-fill').style.width = `${percentage}%`;
+        }
+
+        function createStepElement(stepNumber) {
+            const stepData = {
+                2: {
+                    title: 'Montaj İşlemleri',
+                    content: 'Sistemin montajını gerçekleştirin:<ul><li>PVC boruları 15° eğimle yerleştirin</li><li>Her 20cm\'de bitki deliği açın (5cm çap)</li><li>Su pompasını rezervuara bağlayın</li><li>Dönüş hortumunu rezervuara bağlayın</li></ul>'
+                },
+                3: {
+                    title: 'Besin Çözeltisi Hazırlığı',
+                    content: 'Bitkilerin ihtiyacı olan besin çözeltisini hazırlayın:<ul><li>pH değerini 5.5-6.5 arasında ayarlayın</li><li>EC değerini 1.2-1.8 arasında tutun</li><li>A ve B besin çözeltilerini karıştırın</li><li>Su sıcaklığını 18-22°C\'de tutun</li></ul>'
+                },
+                4: {
+                    title: 'Sistem Testi',
+                    content: 'Sistemin düzgün çalışıp çalışmadığını test edin:<ul><li>Pompayı çalıştırın ve su akışını kontrol edin</li><li>Tüm borularda su akışını gözlemleyin</li><li>Sızıntı olup olmadığını kontrol edin</li><li>Timer\'ı ayarlayın (15 dk açık, 15 dk kapalı)</li></ul>'
+                },
+                5: {
+                    title: 'Fide Dikimi',
+                    content: 'Hazırladığınız fideleri sisteme yerleştirin:<ul><li>Fideleri bitki sepetlerine yerleştirin</li><li>Kök bölgesini perlit ile destekleyin</li><li>Sepetleri deliklere yerleştirin</li><li>İlk 24 saat pompa sürekli çalışsın</li></ul>'
+                }
+            };
+
+            const step = document.createElement('div');
+            step.id = `step-${stepNumber}`;
+            step.className = 'step-container hidden';
+            step.innerHTML = `
+                <div class="step-header">
+                    <div class="step-number">${stepNumber}</div>
+                    <h3>${stepData[stepNumber].title}</h3>
+                </div>
+                <p>${stepData[stepNumber].content}</p>
+            `;
+            
+            return step;
+        }
+
+        function acceptRecommendation() {
+            closeModal();
+            showScreen('systems-screen');
+            showNotification('👍 Öneri kabul edildi. Sistem seçimi sayfasına yönlendirildiniz.', 'success');
+        }
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
+        }
+
+        function contactSupplier(supplierId) {
+            const suppliers = {
+                1: { name: 'Tarım Tek A.Ş.', phone: '0212 555 0123', email: 'info@tarimtek.com.tr' },
+                2: { name: 'Sera Malzeme Ltd.', phone: '0242 555 0456', email: 'info@seramalzeme.com.tr' },
+                3: { name: 'Hidroponik Teknoloji', phone: '0232 555 0789', email: 'info@hidroponiktek.com.tr' }
+            };
+            
+            const supplier = suppliers[supplierId];
+            document.getElementById('contact-content').innerHTML = `
+                <p><strong>Firma:</strong> ${supplier.name}</p>
+                <p><strong>Telefon:</strong> ${supplier.phone}</p>
+                <p><strong>E-posta:</strong> ${supplier.email}</p>
+            `;
+            
+            document.getElementById('contact-modal').style.display = 'block';
+        }
+
+        function callSupplier() {
+            showNotification('📞 Telefon uygulaması açılıyor...', 'info');
+            closeModal();
+        }
+
+        function sharePost() {
+            const textarea = document.querySelector('textarea');
+            if (textarea.value.trim()) {
+                showNotification('📤 Gönderiniz başarıyla paylaşıldı!', 'success');
+                textarea.value = '';
+            } else {
+                showNotification('⚠️ Lütfen bir içerik girin.', 'warning');
+            }
+        }
+
+        function likePost(postId) {
+            showNotification('👍 Beğeni eklendi!', 'success');
+        }
+
+        function showComments(postId) {
+            showNotification('💬 Yorumlar yükleniyor...', 'info');
+        }
+
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                warning: '#ffc107',
+                info: '#17a2b8'
+            };
+
+            const notification = document.createElement('div');
+            notification.className = 'notification-toast';
+            notification.style.background = colors[type];
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>${message}</span>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: white; font-size: 18px; cursor: pointer; margin-left: 10px;">×</button>
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal();
+            }
+        });
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🌱 AgroGuide Mobil Uygulaması yüklendi!');
+            showNotification('🌱 AgroGuide\'a hoş geldiniz! Topraksız tarım yolculuğunuza başlayalım.', 'success');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
+                    
